@@ -14,7 +14,7 @@ import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.validation.Status;
 /**
  * 原始实例
- * @author cyliu
+ * @author  cyliu
  *
  */
 public class MysqlToHdfs {
