@@ -1,10 +1,9 @@
-target/*
+*.class
 .classpath
 .project
 .settings/
-
 # Compiled class file
-*.class
+
 
 # Log file
 *.log

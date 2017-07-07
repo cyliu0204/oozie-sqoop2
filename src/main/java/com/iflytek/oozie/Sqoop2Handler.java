@@ -10,7 +10,7 @@ import com.iflytek.oozie.sqoop2.utils.ResourceLoader;
 
 /**
  * sqoop2迁移主类
- *
+ * 读取配置文件 直接可以创建job link
  */
 public class Sqoop2Handler 
 {

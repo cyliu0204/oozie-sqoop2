@@ -12,7 +12,11 @@ import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.validation.Status;
-
+/**
+ * 原始实例
+ * @author cyliu
+ *
+ */
 public class MysqlToHdfs {
     public static void main(String[] args) {
         sqoopTransfer();
