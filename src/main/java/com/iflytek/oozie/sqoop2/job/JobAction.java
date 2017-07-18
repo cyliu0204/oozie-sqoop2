@@ -3,46 +3,29 @@ package com.iflytek.oozie.sqoop2.job;
 import java.util.List;
 
 import org.apache.sqoop.model.MDriverConfig;
-import org.apache.sqoop.model.MFromConfig;
 import org.apache.sqoop.model.MJob;
 import org.apache.sqoop.model.MSubmission;
-import org.apache.sqoop.model.MToConfig;
 import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.validation.Status;
 
 import com.iflytek.oozie.Sqoop2Handler;
-import com.iflytek.oozie.sqoop2.action.Sqoop2Action;
 import com.iflytek.oozie.sqoop2.utils.StringUtils;
 
 public class JobAction {
 	/**
 	 * 配置字段
 	 */
-	public static final String CONF_PREFIX = "oozie.sqoop2.job.JobAction.";
-
-	public static final String JOB_NAME = CONF_PREFIX+"JobName";
 
 	
-    public static final String JOB_JDBC_TO_TABLENAME = CONF_PREFIX + "ToTableName";
-
-    public static final String JOB_JDBC_FROM_TABLENAME = CONF_PREFIX + "FromTableName";
-
-    public static final String JOB_JDBC_TO_PARTITIONCOLUMN = CONF_PREFIX + "ToPartitionColumn";
-
-    public static final String JOB_JDBC_FROM_PARTITIONCOLUMN = CONF_PREFIX + "FromPartitionColumn";
-    
-    public static final String JOB_JDBC_TO_SCHEMANAME = CONF_PREFIX + "ToSchemaName";
-
-    public static final String JOB_JDBC_FROM_SCHEMANAME = CONF_PREFIX + "FromSchemaName";
-
-    public static final String JOB_HDFS_FROM_HDFSURL = CONF_PREFIX + "FromHdfsUrl";
-
-    public static final String JOB_HDFS_TO_HDFSURL = CONF_PREFIX + "ToHdfsUrl";
+	
+	public static final String CONF_PREFIX = "oozie.sqoop2.job.JobAction.";
 
     
-    public static final String NumExtractors = CONF_PREFIX + "NumExtractors";
+	public static final String JOB_NAME = CONF_PREFIX+"JobName";
+	
+	 public static final String NumExtractors = CONF_PREFIX + "NumExtractors";
 
 	public String getPropertyConfig(String key) {
 		return StringUtils.getNotNullString(Sqoop2Handler.properties.get(key));
@@ -51,17 +34,18 @@ public class JobAction {
 	 * @description：根据属性创建job
 	 * 
 	 */
-	public MJob createJob(long fromLinkId, long toLinkId) {
-		MJob job = Sqoop2Handler.client.createJob(fromLinkId, toLinkId);
+	public MJob createJob(String fromLinkName, String toLinkName) {
+		MJob job = Sqoop2Handler.client.createJob(fromLinkName, toLinkName);
 
 		job.setName(getPropertyConfig(JOB_NAME));
 	 	job.setCreationUser("sqoop");
 		// 设置源链接任务配置信息
-		setupMfromConfig(job);
+		JobConifg.setupMfromConfig(job);
 		// 设置目的链接任务信息
-		setupMToConfig(job);
+		JobConifg.setupMToConfig(job);
 
 		MDriverConfig driverConfig = job.getDriverConfig();
+		
 		driverConfig.getIntegerInput("throttlingConfig.numExtractors")
 				.setValue(Integer.valueOf(getPropertyConfig(NumExtractors)));
 
@@ -79,7 +63,7 @@ public class JobAction {
 			Status status = Sqoop2Handler.client.saveJob(job);
 			
 			if (status.canProceed()) {
-				System.out.println("JOB创建成功，ID为: " + job.getPersistenceId());
+				System.out.println("JOB创建成功，ID为: " + job.getName());
 			} else {
 				System.out.println("JOB创建失败。");
 				return null;
@@ -93,13 +77,15 @@ public class JobAction {
       * @param job
       */
 	public void startJob(MJob job) {
-		long jobId = job.getPersistenceId();
-		MSubmission submission = Sqoop2Handler.client.startJob(jobId);
+		String jobName = job.getName();
+		MSubmission submission = Sqoop2Handler.client.startJob(jobName);
 		System.out.println("JOB提交状态为 : " + submission.getStatus());
+		submission=Sqoop2Handler.client.getJobStatus(jobName);
 		while (submission.getStatus().isRunning()
 				&& submission.getProgress() != -1) {
+			submission=Sqoop2Handler.client.getJobStatus(jobName);
 			System.out.println("进度 : "
-					+ String.format("%.2f %%", submission.getProgress() * 100));
+					+ String.format("%.2f %%", Math.abs(submission.getProgress() * 100)));
 			// 三秒报告一次进度
 			try {
 				Thread.sleep(3000);
@@ -124,60 +110,12 @@ public class JobAction {
 			}
 		}
 		if (!submission.getStatus().isFailure()) {
-			System.out.println("JOB执行成功");
+			System.out.println("JOB 执行成功");
+		}else {
+			System.out.println("JOB 执行失败");
 		}
 	}
 	
 	
 	
-	private void setupMToConfig(MJob job) {
-		MToConfig toJobConfig = job.getToJobConfig();
-
-		String connectorName = getPropertyConfig(Sqoop2Action.LINK_TO_CONNECTORNAME);
-		// jdbc
-		if (connectorName.equals("generic-jdbc-connector")) {
-
-			toJobConfig.getStringInput("toJobConfig.schemaName").setValue(
-					getPropertyConfig(JOB_JDBC_TO_SCHEMANAME));
-			toJobConfig.getStringInput("toJobConfig.tableName").setValue(
-					getPropertyConfig(JOB_JDBC_TO_TABLENAME));
-			
-			//可选项配置时候需要判断非空
-			if (!getPropertyConfig(JOB_JDBC_TO_PARTITIONCOLUMN).isEmpty()) {
-				toJobConfig.getStringInput("toJobConfig.partitionColumn")
-				.setValue(getPropertyConfig(JOB_JDBC_TO_PARTITIONCOLUMN));
-			}
-			
-			
-		} else if (connectorName.equals("hdfs-connector")) {
-
-			toJobConfig.getStringInput("toJobConfig.outputDirectory").setValue(
-					getPropertyConfig(JOB_HDFS_TO_HDFSURL));
-
-		}
-	}
-
-	// 根据选择源选择设置job属性
-	private void setupMfromConfig(MJob job) {
-		MFromConfig fromJobConfig = job.getFromJobConfig();
-		String connectorName = getPropertyConfig(Sqoop2Action.LINK_FROM_CONNECTORNAME);
-		// jdbc
-		if (connectorName.equals("generic-jdbc-connector")) {
-
-			fromJobConfig.getStringInput("fromJobConfig.schemaName").setValue(
-					getPropertyConfig(JOB_JDBC_FROM_SCHEMANAME));
-			fromJobConfig.getStringInput("fromJobConfig.tableName").setValue(
-					getPropertyConfig(JOB_JDBC_FROM_TABLENAME));
-			//可选项配置时候需要判断非空
-			if (!getPropertyConfig(JOB_JDBC_FROM_PARTITIONCOLUMN).isEmpty()) {
-				fromJobConfig.getStringInput("fromJobConfig.partitionColumn")
-				.setValue(getPropertyConfig(JOB_JDBC_FROM_PARTITIONCOLUMN));
-			}
-			
-		} else if (connectorName.equals("hdfs-connector")) {
-			fromJobConfig.getStringInput("fromJobConfig.inputDirectory")
-					.setValue(getPropertyConfig(JOB_HDFS_FROM_HDFSURL));
-		}
-
-	}
 }

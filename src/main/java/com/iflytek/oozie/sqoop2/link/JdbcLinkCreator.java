@@ -36,13 +36,13 @@ public class JdbcLinkCreator extends LinkCreator{
 	 		Link.setName(linkName);
 	 	    Link.setCreationUser("sqoop");
 	 		MLinkConfig LinkConfig = Link.getConnectorLinkConfig();
-	 		LinkConfig.getStringInput("linkConfig.connectionString").setValue(getPropertyConfig("JdbcUrl"));
-	 		LinkConfig.getStringInput("linkConfig.jdbcDriver").setValue(getPropertyConfig("JdbcDriver"));
-	 		LinkConfig.getStringInput("linkConfig.username").setValue(getPropertyConfig("JdbcUser"));
-	 		LinkConfig.getStringInput("linkConfig.password").setValue(getPropertyConfig("JdbcPasswd"));
+	 		LinkConfig.getStringInput("linkConfig.connectionString").setValue(getPropertyConfig(LINK_JDBC_URL));
+	 		LinkConfig.getStringInput("linkConfig.jdbcDriver").setValue(getPropertyConfig(LINK_JDBC_DRIVER));
+	 		LinkConfig.getStringInput("linkConfig.username").setValue(getPropertyConfig(LINK_JDBC_USER));
+	 		LinkConfig.getStringInput("linkConfig.password").setValue(getPropertyConfig(LINK_JDBC_PASSWD));
 	 		Status Status = Sqoop2Handler. client.saveLink(Link);
 	 		if(Status.canProceed()) {
-	 		 System.out.println("创建JDBC Link成功，ID为: " + Link.getPersistenceId());
+	 		 System.out.println("创建JDBC Link成功，Name为: " + Link.getName());
 	 		} else {
 	 		 System.out.println("创建JDBC Link失败");
 	 		}

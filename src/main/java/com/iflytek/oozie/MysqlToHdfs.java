@@ -12,11 +12,7 @@ import org.apache.sqoop.submission.counter.Counter;
 import org.apache.sqoop.submission.counter.CounterGroup;
 import org.apache.sqoop.submission.counter.Counters;
 import org.apache.sqoop.validation.Status;
-/**
- * 原始实例
- * @author  cyliu
- *
- */
+
 public class MysqlToHdfs {
     public static void main(String[] args) {
         sqoopTransfer();
@@ -28,7 +24,7 @@ public class MysqlToHdfs {
         
         //创建一个源链接 JDBC
         long fromConnectorId = 4;
-        MLink fromLink = client.createLink(fromConnectorId);
+        MLink fromLink = client.createLink("");
         fromLink.setName("JDBC connector1");
         fromLink.setCreationUser("admln");
         MLinkConfig fromLinkConfig = fromLink.getConnectorLinkConfig();
@@ -38,28 +34,28 @@ public class MysqlToHdfs {
         fromLinkConfig.getStringInput("linkConfig.password").setValue("iflytek");
         Status fromStatus = client.saveLink(fromLink);
         if(fromStatus.canProceed()) {
-         System.out.println("创建JDBC Link成功，ID为: " + fromLink.getPersistenceId());
+         System.out.println("创建JDBC Link成功，Name为: " + fromLink.getName());
         } else {
          System.out.println("创建JDBC Link失败");
         }
         //创建一个目的地链接HDFS
         long toConnectorId = 3;
-        MLink toLink = client.createLink(toConnectorId);
+        MLink toLink = client.createLink("");
         toLink.setName("HDFS connector");
         toLink.setCreationUser("admln");
         MLinkConfig toLinkConfig = toLink.getConnectorLinkConfig();
         toLinkConfig.getStringInput("linkConfig.uri").setValue("hdfs://192.168.11.251:8020/");
         Status toStatus = client.saveLink(toLink);
         if(toStatus.canProceed()) {
-         System.out.println("创建HDFS Link成功，ID为: " + toLink.getPersistenceId());
+         System.out.println("创建HDFS Link成功，Name为: " + toLink.getName());
         } else {
          System.out.println("创建HDFS Link失败");
         }
         
         //创建一个任务
-        long fromLinkId = fromLink.getPersistenceId();
-        long toLinkId = toLink.getPersistenceId();
-        MJob job = client.createJob(fromLinkId, toLinkId);
+        String fromLinkName = fromLink.getName();
+        String toLinkName = toLink.getName();
+        MJob job = client.createJob(fromLinkName, toLinkName);
         job.setName("MySQL to HDFS job1");
         job.setCreationUser("admln");
         //设置源链接任务配置信息
@@ -80,8 +76,8 @@ public class MysqlToHdfs {
         }
         
         //启动任务
-        long jobId = job.getPersistenceId();
-        MSubmission submission = client.startJob(jobId);
+        String jobName = job.getName();
+        MSubmission submission = client.startJob(jobName);
         System.out.println("JOB提交状态为 : " + submission.getStatus());
         while(submission.getStatus().isRunning() && submission.getProgress() != -1) {
           System.out.println("进度 : " + String.format("%.2f %%", submission.getProgress() * 100));

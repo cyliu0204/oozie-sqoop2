@@ -26,6 +26,22 @@ public abstract class LinkCreator {
     public static final String LINK_JDBC_PASSWD = CONF_PREFIX + "JdbcPasswd";
 
     public static final String LINK_HDFS_URL = CONF_PREFIX + "HdfsUrl";
+    
+    public static final String LINK_KAKFA_BROKER=CONF_PREFIX+"BrokerList";
+    
+    public static final String LINK_KAFKA_ZOOKEEPER=CONF_PREFIX+ "ZookeeperConnect";
+    
+    public static final String LINK_HIVE_URL=CONF_PREFIX+"HiveUrl";
+    
+    public static final String LINK_HIVE_HDFSURI=CONF_PREFIX+"HdfsUri";
+    
+    public static final String LINK_HIVE_USER=CONF_PREFIX+"HiveUser";
+    
+    public static final String LINK_HIVE_PASSWD=CONF_PREFIX+"HivePasswd";
+    
+ 
+    
+    
     public static final String NumExtractors = CONF_PREFIX + "NumExtractors";
 	
 	/**

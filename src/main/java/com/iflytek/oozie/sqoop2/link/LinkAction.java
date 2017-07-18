@@ -44,12 +44,19 @@ public class LinkAction  {
 				linkCreator=new HdfsLinkCreator(isCreateLink, linkId, linkName, connectorName);
 				return linkCreator.createLink();
 			
+			}else if(connectorName.equals("kafka-connector")) {
+				linkCreator=new KafkaLinkCreator(isCreateLink, linkId, linkName, connectorName);
+				return linkCreator.createLink();
+			
+			}else if (connectorName.equals("hive-connector-1")) {
+				linkCreator= new HiveLinkCreator(isCreateLink, linkId, linkName, connectorName);
+				return linkCreator.createLink();
 			}
 		 }else {
-			 if (!linkId.isEmpty()) {
-				 return Sqoop2Handler.client.getLink(Long.valueOf(linkId));
+			 if (!linkName.isEmpty()) {
+				 return Sqoop2Handler.client.getLink(linkName);
 			}else {
-				throw new RuntimeException("LinkId 不能为空");
+				throw new RuntimeException("LinkName 不能为空");
 			}
 		}
 		return null;

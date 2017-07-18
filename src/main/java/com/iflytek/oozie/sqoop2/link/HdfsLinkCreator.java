@@ -41,10 +41,10 @@ public class HdfsLinkCreator extends LinkCreator{
           hdfsLink.setName(linkName);
           hdfsLink.setCreationUser("sqoop");
           MLinkConfig toLinkConfig = hdfsLink.getConnectorLinkConfig();
-          toLinkConfig.getStringInput("linkConfig.uri").setValue(getPropertyConfig("HdfsUrl"));
+          toLinkConfig.getStringInput("linkConfig.uri").setValue(getPropertyConfig(LINK_HDFS_URL));
           Status toStatus = Sqoop2Handler.client.saveLink(hdfsLink);
           if(toStatus.canProceed()) {
-          System.out.println("创建HDFS Link成功，ID为: " + hdfsLink.getPersistenceId());
+          System.out.println("创建HDFS Link成功，Name为: " + hdfsLink.getName());
            } else {
             System.out.println("创建HDFS Link失败");
           }

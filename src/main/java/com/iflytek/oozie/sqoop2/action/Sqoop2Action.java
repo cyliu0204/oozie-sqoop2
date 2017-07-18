@@ -54,12 +54,12 @@ public class Sqoop2Action {
 		MLink toLink = new LinkAction(isCreateLink, linkId, linkName,
 				connectorName).createLink();
 		// 创建一个任务
-		long fromLinkId = fromLink.getPersistenceId();
-		long toLinkId = toLink.getPersistenceId();
+		String fromLinkName = fromLink.getName();
+		String toLinkName = toLink.getName();
 
 		JobAction jobAction = new JobAction();
 
-		MJob job = jobAction.createJob(fromLinkId, toLinkId);
+		MJob job = jobAction.createJob(fromLinkName, toLinkName);
 
 		// 启动任务
 		jobAction.startJob(job);
